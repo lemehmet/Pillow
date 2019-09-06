@@ -84,6 +84,8 @@ _LIB_IMAGING = (
     "RankFilter",
     "RawDecode",
     "RawEncode",
+    "VRawEncode",
+    "VRawDecode",
     "Storage",
     "SgiRleDecode",
     "SunRleDecode",
