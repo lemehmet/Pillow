@@ -57,9 +57,6 @@ ImagingVRawEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 		return 0;
     }
 
-	fprintf(stderr, "VRawEncode: Mode: %s Type: %d Bands: %d Size: %d x %d im8: %p im32: %p PixSize: %d LineSize: %d\n", im->mode, im->type, im->bands,
-		im->xsize, im->ysize, im->image8, im->image32, im->pixelsize, im->linesize);
-
     ptr = buf;
     while (bytes >= state->bytes) {
 		state->shuffle(ptr, (UINT8*) im->image[state->y + state->yoff] +

@@ -43,8 +43,8 @@ ImagingVRawDecode(Imaging im, ImagingCodecState state, UINT8* buf, Py_ssize_t by
 		state->state = LINE;
     }
     ptr = buf;
-	fprintf(stderr, "VRawDecode: Mode: %s Type: %d Bands: %d Size: %d x %d im8: %p im32: %p PixSize: %d LineSize: %d\n", im->mode, im->type, im->bands,
-		im->xsize, im->ysize, im->image8, im->image32, im->pixelsize, im->linesize);
+	// VRawEncode: Mode: 1 Type: 0 Bands: 1 Size: 128 x 64 im8: 0xa52e90 im32: (nil) PixSize: 1 LineSize: 128
+
     for (;;) {
 
 		if (state->state == SKIP) {
