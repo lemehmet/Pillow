@@ -24,6 +24,10 @@ int
 ImagingVRawEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 {
     UINT8* ptr;
+	// RawEncode: st: 0 c:0 xy: 0x0 xyoff: 0x0 xysize: 128x64 yst: 1 bits:1 bytes: 65536 st.bytes:16
+	// fprintf(stderr, "RawEncode: st: %d c:%d xy: %dx%d xyoff: %dx%d xysize: %dx%d yst: %d bits:%d bytes: %d st.bytes:%d\n", 
+	// 	state->state, state->count, state->x, state->y, state->xoff, state->yoff, state->xsize, state->ysize,
+	// 	state->ystep, state->bits, bytes, state->bytes);
     if (!state->state) {
 		/* The "count" field holds the stride, if specified.  Fix
 		   things up so "bytes" is the full size, and "count" the
@@ -58,24 +62,31 @@ ImagingVRawEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
     }
 
     ptr = buf;
-    while (bytes >= state->bytes) {
-		state->shuffle(ptr, (UINT8*) im->image[state->y + state->yoff] +
-				state->xoff * im->pixelsize, state->xsize);
 
-		if (state->bytes > state->count)
-			/* zero-pad the buffer, if necessary */
-			memset(ptr + state->count, 0, state->bytes - state->count);
-
-		ptr += state->bytes;
-		bytes -= state->bytes;
-
-		state->y += state->ystep;
-
-		if (state->y < 0 || state->y >= state->ysize) {
-			state->errcode = IMAGING_CODEC_END;
-			break;
+	int pages = im->ysize / 8;
+	int xoffset = state->xoff * im->pixelsize;
+	// TODO: ystep = -1 case
+	for(int py = 0; py < pages; ++py) {
+		// fprintf(stderr, "py: %d", py);
+		int y = py * 8;
+		int yoffset = y + state->yoff;
+		for(int x = 0; x < state->xsize; ++x) {
+			*ptr = (*(im->image[yoffset + 0] + xoffset + x) == 0 ? 0 : 0x01) |
+					(*(im->image[yoffset + 1] + xoffset + x) == 0 ? 0 : 0x02) |
+					(*(im->image[yoffset + 2] + xoffset + x) == 0 ? 0 : 0x04) |
+					(*(im->image[yoffset + 3] + xoffset + x) == 0 ? 0 : 0x08) |
+					(*(im->image[yoffset + 4] + xoffset + x) == 0 ? 0 : 0x10) |
+					(*(im->image[yoffset + 5] + xoffset + x) == 0 ? 0 : 0x20) |
+					(*(im->image[yoffset + 6] + xoffset + x) == 0 ? 0 : 0x40) |
+					(*(im->image[yoffset + 7] + xoffset + x) == 0 ? 0 : 0x80);
+			ptr++;
+			if ((ptr - buf) >= bytes) {
+				break;
+			}
 		}
-    }
-    return ptr - buf;
-
+	}
+	// fprintf(stderr, "returning %d bytes\n", (ptr - buf));
+	state->errcode = IMAGING_CODEC_END;
+	state->y = im->ysize;
+	return ptr - buf;
 }
