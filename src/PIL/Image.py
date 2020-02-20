@@ -751,7 +751,7 @@ class Image(object):
         if len(args) == 1 and isinstance(args[0], tuple):
             args = args[0]
 
-        if encoder_name == "raw" and args == ():
+        if (encoder_name == "raw" or encoder_name == "vraw") and args == ():
             args = self.mode
 
         self.load()
